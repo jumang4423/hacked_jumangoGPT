@@ -122,7 +122,7 @@ export const Chatbar: FC<Props> = ({
 
   return (
     <div
-      className={`fixed top-0 bottom-0 z-50 flex h-full w-[260px] flex-none flex-col space-y-2 bg-[#202123] p-2 transition-all sm:relative sm:top-0`}
+      className={`z-200 fixed bottom-0 top-0 flex h-full w-[260px] flex-none flex-col space-y-2 bg-[#333] p-2 transition-all sm:relative sm:top-0`}
     >
       <div className="flex items-center">
         <button
@@ -143,14 +143,6 @@ export const Chatbar: FC<Props> = ({
           <IconFolderPlus size={18} />
         </button>
       </div>
-
-      {conversations.length > 1 && (
-        <Search
-          placeholder="Search conversations..."
-          searchTerm={searchTerm}
-          onSearch={setSearchTerm}
-        />
-      )}
 
       <div className="flex-grow overflow-auto">
         {folders.length > 0 && (

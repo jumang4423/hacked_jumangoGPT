@@ -56,21 +56,11 @@ export const ChatbarSettings: FC<Props> = ({
         onClick={() => onExportConversations()}
       />
 
-      <SidebarButton
-        text={lightMode === 'light' ? t('Dark mode') : t('Light mode')}
-        icon={
-          lightMode === 'light' ? <IconMoon size={18} /> : <IconSun size={18} />
-        }
-        onClick={() =>
-          onToggleLightMode(lightMode === 'light' ? 'dark' : 'light')
-        }
-      />
-
-      {!(serverSideApiKeyIsSet) ? (
+      {!serverSideApiKeyIsSet ? (
         <Key apiKey={apiKey} onApiKeyChange={onApiKeyChange} />
       ) : null}
 
-      {!(serverSidePluginKeysSet) ? (
+      {!serverSidePluginKeysSet ? (
         <PluginKeys
           pluginKeys={pluginKeys}
           onPluginKeyChange={onPluginKeyChange}

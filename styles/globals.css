@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Lain";   /*Can be any text*/
+  src: local("LoveLetter"),
+    url("/LoveLetter.ttf") format("truetype");
+}
+
+*, *::before, *::after {
+  font-family: 'Iosevka Web';
+  color: lightblue;
+}
+
 ::-webkit-scrollbar-track {
   background-color: transparent;
 }
@@ -29,14 +40,9 @@
 }
 
 html {
-  background: #202123;
+  background: #000;
 }
 
-@media (max-width: 720px) {
-  pre {
-    width: calc(100vw - 110px);
-  }
-}
 
 pre:has(div.codeblock) {
   padding: 0;

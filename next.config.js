@@ -10,6 +10,12 @@ const nextConfig = {
       asyncWebAssembly: true,
       layers: true,
     };
+    config.module.rules.push({
+      test: /\.mp3$/,
+      use: {
+        loader: 'file-loader',
+      },
+    });
 
     return config;
   },

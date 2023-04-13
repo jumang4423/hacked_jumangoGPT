@@ -1,11 +1,5 @@
 import { Message } from '@/types/chat';
-import {
-  IconCheck,
-  IconCopy,
-  IconEdit,
-  IconUser,
-  IconRobot,
-} from '@tabler/icons-react';
+import { IconCheck, IconCopy, IconEdit } from '@tabler/icons-react';
 import { useTranslation } from 'next-i18next';
 import { FC, memo, useEffect, useRef, useState } from 'react';
 import rehypeMathjax from 'rehype-mathjax';
@@ -13,21 +7,24 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import { CodeBlock } from '../Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '../Markdown/MemoizedReactMarkdown';
+import useSound from 'use-sound';
+import { motion } from 'framer-motion';
 
 interface Props {
   message: Message;
   messageIndex: number;
   onEditMessage: (message: Message, messageIndex: number) => void;
+  isLastMsg?: boolean;
 }
 
 export const ChatMessage: FC<Props> = memo(
-  ({ message, messageIndex, onEditMessage }) => {
+  ({ message, messageIndex, onEditMessage, isLastMsg = false }) => {
     const { t } = useTranslation('chat');
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isTyping, setIsTyping] = useState<boolean>(false);
     const [messageContent, setMessageContent] = useState(message.content);
     const [messagedCopied, setMessageCopied] = useState(false);
-
+    const [play] = useSound('/click.mp3');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const toggleEditing = () => {
@@ -76,25 +73,27 @@ export const ChatMessage: FC<Props> = memo(
       }
     }, [isEditing]);
 
+    useEffect(() => {
+      play();
+    }, [message.content]);
+
     return (
       <div
-        className={`group px-4 ${
-          message.role === 'assistant'
-            ? 'border-b border-black/10 bg-gray-50 text-gray-800 dark:border-gray-900/50 dark:bg-[#444654] dark:text-gray-100'
-            : 'border-b border-black/10 bg-white text-gray-800 dark:border-gray-900/50 dark:bg-[#343541] dark:text-gray-100'
-        }`}
-        style={{ overflowWrap: 'anywhere' }}
+        className={`group w-full rounded-md`}
+        style={{
+          overflowWrap: 'anywhere',
+          fontFamily: 'Iosevka',
+          lineHeight: '1.5',
+          fontStretch: 'condensed',
+          fontWeight: 400,
+        }}
       >
-        <div className="relative m-auto flex gap-4 p-4 text-base md:max-w-2xl md:gap-6 md:py-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl">
-          <div className="min-w-[40px] text-right font-bold">
-            {message.role === 'assistant' ? (
-              <IconRobot size={30} />
-            ) : (
-              <IconUser size={30} />
-            )}
+        <div className="lg:max-w-14xl xl:max-w-14xl relative m-auto flex p-0 text-base md:max-w-5xl md:gap-1 md:py-1">
+          <div className="">
+            {message.role === 'assistant' ? <div>{'*'}</div> : <div>{'>'}</div>}
           </div>
 
-          <div className="prose mt-[-2px] w-full dark:prose-invert">
+          <div className="dark:prose-invert">
             {message.role === 'user' ? (
               <div className="flex w-full">
                 {isEditing ? (
@@ -137,51 +136,33 @@ export const ChatMessage: FC<Props> = memo(
                     </div>
                   </div>
                 ) : (
-                  <div className="prose whitespace-pre-wrap dark:prose-invert">
+                  <div
+                    className="dark:prose-invert"
+                    style={{ backgroundColor: '#440' }}
+                  >
                     {message.content}
                   </div>
                 )}
-
-                {(window.innerWidth < 640 || !isEditing) && (
-                  <button
-                    className={`absolute translate-x-[1000px] text-gray-500 hover:text-gray-700 focus:translate-x-0 group-hover:translate-x-0 dark:text-gray-400 dark:hover:text-gray-300 ${
-                      window.innerWidth < 640
-                        ? 'bottom-1 right-3'
-                        : 'right-0 top-[26px]'
-                    }
-                    `}
-                    onClick={toggleEditing}
-                  >
-                    <IconEdit size={20} />
-                  </button>
-                )}
               </div>
             ) : (
-              <>
-                <div
-                  className={`absolute ${
-                    window.innerWidth < 640
-                      ? 'bottom-1 right-3'
-                      : 'right-0 top-[26px] m-0'
-                  }`}
-                >
-                  {messagedCopied ? (
-                    <IconCheck
-                      size={20}
-                      className="text-green-500 dark:text-green-400"
-                    />
-                  ) : (
-                    <button
-                      className="translate-x-[1000px] text-gray-500 hover:text-gray-700 focus:translate-x-0 group-hover:translate-x-0 dark:text-gray-400 dark:hover:text-gray-300"
-                      onClick={copyOnClick}
-                    >
-                      <IconCopy size={20} />
-                    </button>
-                  )}
-                </div>
-
+              <motion.div
+                className=" lg:max-w-14xl xl:max-w-14xl relative m-auto flex text-base md:max-w-5xl md:gap-5 lg:px-0"
+                style={{
+                  backgroundColor: '#004',
+                }}
+                animate={{
+                  backgroundColor: isLastMsg
+                    ? ['#004F', '#0044', '#004F']
+                    : ['#004F'],
+                  transition: {
+                    ease: 'linear',
+                    duration: 1,
+                    repeat: Infinity,
+                  },
+                }}
+              >
                 <MemoizedReactMarkdown
-                  className="prose dark:prose-invert"
+                  className="center w-full dark:prose-invert"
                   remarkPlugins={[remarkGfm, remarkMath]}
                   rehypePlugins={[rehypeMathjax]}
                   components={{
@@ -196,28 +177,32 @@ export const ChatMessage: FC<Props> = memo(
                           {...props}
                         />
                       ) : (
-                        <code className={className} {...props}>
+                        <code
+                          className={className}
+                          {...props}
+                          style={{ width: '100%' }}
+                        >
                           {children}
                         </code>
                       );
                     },
                     table({ children }) {
                       return (
-                        <table className="border-collapse border border-black px-3 py-1 dark:border-white">
+                        <table className="border-collapse border border-black py-1 dark:border-white">
                           {children}
                         </table>
                       );
                     },
                     th({ children }) {
                       return (
-                        <th className="break-words border border-black bg-gray-500 px-3 py-1 text-white dark:border-white">
+                        <th className="break-words border border-black bg-gray-500 py-1 text-white dark:border-white">
                           {children}
                         </th>
                       );
                     },
                     td({ children }) {
                       return (
-                        <td className="break-words border border-black px-3 py-1 dark:border-white">
+                        <td className="break-words border border-black py-1 dark:border-white">
                           {children}
                         </td>
                       );
@@ -226,7 +211,7 @@ export const ChatMessage: FC<Props> = memo(
                 >
                   {message.content}
                 </MemoizedReactMarkdown>
-              </>
+              </motion.div>
             )}
           </div>
         </div>
